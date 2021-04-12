@@ -1,11 +1,11 @@
-#!/usr/bin/env micropython
-import time
-from time import sleep
+#!/usr/bin/env python3
 
 import ev3dev.ev3
 from ev3dev.ev3 import *
 
 import math
+import time
+from time import sleep
 
 leftWheel = ev3dev.ev3.LargeMotor('outD')
 rightWheel = ev3dev.ev3.LargeMotor('outA')
@@ -25,9 +25,12 @@ g = 9.816
 K = 20
 D = 1
 
+rightWheel.stop()
+leftWheel.stop()
+
 #Timed sampling test
 next_time = int(round(time.time() * 1000)) + samp_time
-while True:
+while False:
 
     sensorACG.mode = "TILT"
     theta = sensorACG.value(2) - theta_star
