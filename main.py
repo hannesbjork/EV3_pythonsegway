@@ -23,11 +23,10 @@ def get_time():
 
 def get_sensordata():
     (ang, angvel) = struct.unpack('<2xb18xh', sensor_ACG.bin_data())
-    return ((ang-40), angvel)
+    return ((ang-40), (angvel/1000))
 
-def get_angvel():
-    sensor_ACG.mode = "GYRO"
-    return sensor_ACG.value(2)
+def get_motordata():
+    return (wheel_left.position%180 - 90, wheel_left.speed)
 
 def set_output(u):
     wheel_left.run_direct(duty_cycle_sp = u)
@@ -46,22 +45,18 @@ g = 9.816 #gravity acceleration
 P = 0.5 #P-constant
 D = 0.1 #D-constant
 
-K = 0.01
+K = 0.05
 
 #Control loop
 next_time = get_time() + sample_time
-u = 0 #TODO
-theta_dot_guess = 0 #TODO
 while True:
 
     #Get sensor values
-    (theta, theta_dot) = get_sensordata()
-    print(str(theta_dot) + "  "+str(theta_dot_guess) )#TODO
+    (psi, psi_dot) = get_sensordata()
+    (theta, theta_dot) = get_motordata()
 
     #Control algorithm
-    u_old = u #TODO
-    u = -(47.4204 * theta + 10.8530 * theta_dot)*K
-    theta_dot_guess = u-u_old #TODO
+    u =  (-4.4452*theta - 6.5298*psi - 0.1136*theta_dot - 0.3721*psi_dot)
 
     #Saturation
     if u > U_MAX:

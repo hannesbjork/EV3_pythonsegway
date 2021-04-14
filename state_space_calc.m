@@ -1,25 +1,27 @@
 
 g = 9.816; %Gravitation acceleration
 
-M = 1; %Body mass
-L = 1; %Body length
-W = 1; %Body width
+H = 0.16; %Body height
 
-R = 1; %Wheel radius
+M = 0.604; %Body mass
+L = H/2; %Body length to center of mass
+W = 0.11; %Body width
+
+R = 0.02; %Wheel radius
 n = 1; %Gear ratio
-m = 0; %Wheel weight
+m = 0.001; %Wheel weight
 
-J_psi = 1; %Body pitch inertial moment
-J_theta = 1; %Body yaw inertial moment
-J_m = 1; %DC motor inertial moment
-J_w = 1; %Wheel inertial moment
+J_psi = M*(L^2); %Body pitch inertial moment
+J_theta = M*((W/2)^2); %Body yaw inertial moment
+J_m = 0; %DC motor inertial moment
+J_w = m*(R^2); %Wheel inertial moment
 
 f_m = 0.01 * M * g; %Friction coefficient between body and DC motor
 f_w = 0.02 * M * g; %Friction coefficient between wheel and floor.
 
 K_b = 0.46; %DC motor back EMF constant #TODO
 K_t = 0.65*K_b; %DC motor torque constant
-R_m = 50; %Motor resistance
+R_m = 1; %Motor resistance
 
 alpha = n*K_t/R_m;
 beta = n*K_t*K_b/R_m + f_m; 

@@ -1,13 +1,13 @@
 
 g = 9.816; %Gravitation acceleration
 
-M = 1; %Body mass
-L = 1; %Body length
-W = 1; %Body width
+M = 0.604; %Body mass
+L = 0.16; %Body length
+W = 0.11; %Body width
 
-R = 1; %Wheel radius
+R = 0.02; %Wheel radius
 n = 1; %Gear ratio
-m = 0; %Wheel weight
+m = 0.001; %Wheel weight
 
 J_psi = 1; %Body pitch inertial moment
 J_theta = 1; %Body yaw inertial moment
@@ -19,7 +19,7 @@ f_w = 0.02 * M * g; %Friction coefficient between wheel and floor.
 
 K_b = 0.46; %DC motor back EMF constant #TODO
 K_t = 0.65*K_b; %DC motor torque constant
-R_m = 50; %Motor resistance
+R_m = 99999999999; %Motor resistance
 
 alpha = n*K_t/R_m;
 beta = n*K_t*K_b/R_m + f_m; 
@@ -49,7 +49,16 @@ V(1,2) = 2*alpha;
 V(2,1) = -2*alpha;
 V(2,2) = -2*alpha;
 
-A = [zeros(2) eye(2);-(S\U) -(S\T)]
-B = [zeros(2); S\V]
+A = [zeros(2) eye(2);-(S\U) -(S\T)];
+B = [zeros(2); S\V];
 
-Ts = 0.05
+sys = ss(A, B, eye(4), 0);
+Ts = 0.05;
+sysd = c2d(sys, Ts);
+
+A_d = sysd.A;
+B_d = sysd.B;
+
+poles = [0.55+0.1*i, 0.55-0.1*i, 0.40+0.05*i, 0.40-0.05*i];
+K = place(A_d, B_d, poles)
+
