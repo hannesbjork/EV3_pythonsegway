@@ -11,6 +11,8 @@ import struct
 #Init motors
 wheel_left = ev3dev.ev3.LargeMotor('outD')
 wheel_right = ev3dev.ev3.LargeMotor('outA')
+count_per_rot = (wheel_left.count_per_rot + wheel_right.count_per_rot)/2
+
 
 #Init sensor
 sensor_ACG = ev3dev.ev3.Sensor(address="in2")
@@ -23,14 +25,21 @@ def get_time():
 
 def get_sensordata():
     (ang, angvel) = struct.unpack('<2xb18xh', sensor_ACG.bin_data())
-    return ((ang-40), (angvel/1000))
+    return ((math.asin(ang/128)*180/math.pi)-40, (angvel*0.00875))
 
 def get_motordata():
-    return (wheel_left.position%180 - 90, wheel_left.speed)
+    pos = (wheel_left.position + wheel_right.position)/(2*count_per_rot)
+    vel = (wheel_left.speed + wheel_right.speed)/(2*count_per_rot)
 
-def set_output(u):
-    wheel_left.run_direct(duty_cycle_sp = u)
-    wheel_right.run_direct(duty_cycle_sp = u)
+    return (pos%180-94.6, vel)
+
+def set_output_limit(u, angle, max_angle):
+    if abs(angle)>max_angle:
+        wheel_left.stop()
+        wheel_right.stop()
+    else:
+        wheel_left.run_direct(duty_cycle_sp = u)
+        wheel_right.run_direct(duty_cycle_sp = u)
 
 
 #Limit variables
@@ -38,14 +47,9 @@ U_MAX = 90 #in % of max
 U_MIN = -90 #in -% of max
 
 #Control variables
-sample_time = 50; #in ms
+sample_time = 30; #in ms
 
-g = 9.816 #gravity acceleration
-
-P = 0.5 #P-constant
-D = 0.1 #D-constant
-
-K = 0.05
+K = 0.005
 
 #Control loop
 next_time = get_time() + sample_time
@@ -55,8 +59,12 @@ while True:
     (psi, psi_dot) = get_sensordata()
     (theta, theta_dot) = get_motordata()
 
+    print(psi)
+
     #Control algorithm
-    u =  (-4.4452*theta - 6.5298*psi - 0.1136*theta_dot - 0.3721*psi_dot)
+    #u =  -(-4.4452*theta - 6.5298*psi )#- 0.1136*theta_dot )#- 0.3721*psi_dot)
+    #u =  ( 3.4372*psi   + 0.1588*psi_dot)*K
+    u = (7*theta  +9*theta_dot +1700*psi + 120*psi_dot)*K
 
     #Saturation
     if u > U_MAX:
@@ -64,8 +72,8 @@ while True:
     elif u < U_MIN:
         u = U_MIN
 
-    #Set output signal
-    set_output(u)
+    #Set output signal with an angle limit
+    set_output_limit(u, psi, 40)
 
     #Loop timing
     diff_time = next_time - get_time()

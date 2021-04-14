@@ -8,7 +8,7 @@ L = H/2; %Body length to center of mass
 W = 0.11; %Body width
 
 R = 0.02; %Wheel radius
-n = 1; %Gear ratio
+n = 48; %Gear ratio
 m = 0.001; %Wheel weight
 
 J_psi = M*(L^2); %Body pitch inertial moment
