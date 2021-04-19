@@ -17,7 +17,7 @@ count_per_rot = (wheel_left.count_per_rot + wheel_right.count_per_rot)/2
 #Init sensor
 sensor_ACG = ev3dev.ev3.Sensor(address="in2")
 sensor_ACG.mode = "ALL"
-sleep(0.005)
+sleep(0.05)
 
 #Functions
 def get_time():
@@ -49,7 +49,7 @@ U_MIN = -90 #in -% of max
 #Control variables
 sample_time = 30; #in ms
 
-K = 0.005
+K = 1
 
 #Control loop
 next_time = get_time() + sample_time
@@ -62,9 +62,7 @@ while True:
     print(psi)
 
     #Control algorithm
-    #u =  -(-4.4452*theta - 6.5298*psi )#- 0.1136*theta_dot )#- 0.3721*psi_dot)
-    #u =  ( 3.4372*psi   + 0.1588*psi_dot)*K
-    u = (7*theta  +9*theta_dot +1700*psi + 120*psi_dot)*K
+    u = -(7.3368*theta  +43.2866*theta_dot +1.5090*psi + 3.2005*psi_dot)*K
 
     #Saturation
     if u > U_MAX:
