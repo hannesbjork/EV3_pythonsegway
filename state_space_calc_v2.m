@@ -1,16 +1,16 @@
 
 g = 9.816; %Gravitation acceleration
 
-H = 0.144; %Body height
+H = 0.235; %Body height
 
-M = 0.600; %Body mass
+M = 0.572; %Body mass
 L = H/2; %Body length to center of mass
 W = 0.14; %Body width
-D = 0.04;
+D = 0.06;
 
 R = 0.04; %Wheel radius
 n = 1; %Gear ratio
-m = 0.03; %Wheel weight
+m = 0.014; %Wheel weight
 
 J_psi = M*(L^2)/3; %Body pitch inertial moment
 J_theta = M*(W^2 + D^2)/12; %Body yaw inertial moment
@@ -54,16 +54,22 @@ V(1,2) = 2*alpha;
 V(2,1) = -2*alpha;
 V(2,2) = -2*alpha;
 
-A = [zeros(2) eye(2);-(S\U) -(S\T)];
-B = [zeros(2); S\V];
+A = [zeros(2) eye(2);-(inv(S)*U) -(inv(S)*T)];
+B = [zeros(2); inv(S)*V];
 
 sys = ss(A, B, eye(4), 0);
-Ts = 0.03;
+Ts = 30/1000;
 sysd = c2d(sys, Ts);
 
 A_d = sysd.A;
 B_d = sysd.B;
 
-poles = [0.55+0.1*i, 0.55-0.1*i, 0.40+0.05*i, 0.40-0.05*i];
+poles = [0.1, 0.2, 0.3, 0.4];
 K = place(A_d, B_d, poles)
 
+%% Check sys
+
+A_new = A_d - B_d*K;
+B_new = B_d;
+sysnew = ss(A_new, B_new, eye(4), 0, Ts);
+step(sysnew)
