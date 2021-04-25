@@ -8,6 +8,7 @@ import math
 import time
 import sys
 import importlib
+from datetime import datetime
 from time import sleep
 
 ############################################################### Inits
@@ -34,6 +35,12 @@ gyroSensorValueRaw  = open(str(gyroSensor._path) + "/value0", "rb")
 #Init button
 touchSensor = ev3.Sensor(address="in2")
 
+#Set up dump data
+dump_location = "data/dump_" + datetime.now().strftime("%Y%m%d%H%M%S") + ".txt"
+dump_num = 0
+dump_max = 500
+data_dump = open(dump_location, 'a')
+
 ############################################################### Constants
 
 U_MAX = 100 #in % of max
@@ -44,7 +51,7 @@ RAD_PER_DEG = 3.14159/180
 
 ############################################################### Get latest calibration
 
-CALIBRATION_PATH = "segway_calibration.txt"
+CALIBRATION_PATH = "data/calibration_data.txt"
 calib = open(CALIBRATION_PATH, 'r')
 
 GYRO_OFFSET_raw = calib.readline()
@@ -104,6 +111,7 @@ def set_duty(motorDutyFilePath, u):
 #Time variables
 sample_time = 30 #in ms
 sample_time_s = sample_time/1000 #in s
+sample_time_s_2 = sample_time_s**2 #in s^2
 
 #Control parameters
 param_wheelang  = -7  #K1
@@ -115,6 +123,8 @@ param_bodyangspeed = 120 #K4
 wheelAng_old = 0
 wheelAngSpeed = 0
 wheelAng = 0
+bodyAngSpeed_old = 0
+bodyAngSpeed = 0
 bodyAng = 0
 
 #Set first time
@@ -125,12 +135,16 @@ Sound.beep()
 ############################################################### Control loop
 while True:
 
+    #Get new measured values
     wheelAng_old = wheelAng
     wheelAng = get_wheelposition()
+    bodyAngSpeed_old = bodyAngSpeed
     bodyAngSpeed = get_bodyangspeed()
 
-    bodyAng = bodyAng + bodyAngSpeed*sample_time_s
-    wheelAngSpeed = (wheelAng-wheelAng_old)/sample_time_s
+    #Estimate other values
+    bodyAngAcc = bodyAngSpeed - bodyAngSpeed_old
+    bodyAng = bodyAng + bodyAngSpeed*sample_time_s + bodyAngAcc*(sample_time_s_2)
+    wheelAngSpeed = (wheelAng-wheelAng_old)/sample_time_s 
 
     #Debug TODO
     print("wheelAng:"+ str(math.trunc(wheelAng))+" bodyAng:"+ str(math.trunc(bodyAng))+" wheelAngSpeed:"+ str(math.trunc(wheelAngSpeed))+" bodyAngSpeed:"+ str(math.trunc(bodyAngSpeed)))
@@ -143,6 +157,11 @@ while True:
 
     set_duty(motorDutyCycleRight, u)
     set_duty(motorDutyCycleLeft , u)
+
+    #Data dump
+    if dump_num < dump_max:
+        dump_num = dump_num + 1
+        data_dump.write(str(wheelAng) + " " + str(wheelAngSpeed) + " " + str(bodyAng) + " " + str(bodyAngSpeed) + "\n") 
 
     #Loop timing
     diff_time = next_time - get_time()

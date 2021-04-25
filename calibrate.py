@@ -46,10 +46,9 @@ sample_time_s = sample_time/1000 #in s
 next_time = get_time() + sample_time
 
 ############################################################### Calibration loop
-while loops < max_loops:
+while loops <= max_loops:
 
     bodyAngSpeed = get_bodyangspeed()
-    print(bodyAngSpeed)
 
     GYRO_OFFSET = GYRO_OFFSET + bodyAngSpeed/max_loops
 
@@ -64,7 +63,7 @@ while loops < max_loops:
         
     next_time = next_time + sample_time
 
-CALIBRATION_PATH = "segway_calibration.txt"
+CALIBRATION_PATH = "data/calibration_data.txt"
 calib = open(CALIBRATION_PATH,'w') 
 calib.write(str(GYRO_OFFSET)) 
 calib.close()
