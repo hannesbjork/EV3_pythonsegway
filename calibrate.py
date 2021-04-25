@@ -46,11 +46,13 @@ sample_time_s = sample_time/1000 #in s
 next_time = get_time() + sample_time
 
 ############################################################### Calibration loop
-while loops <= max_loops:
+while loops < max_loops:
 
     bodyAngSpeed = get_bodyangspeed()
 
-    GYRO_OFFSET = GYRO_OFFSET + bodyAngSpeed/max_loops
+    GYRO_OFFSET = GYRO_OFFSET + bodyAngSpeed
+
+    print(bodyAngSpeed)
 
     loops = loops + 1
 
@@ -62,6 +64,9 @@ while loops <= max_loops:
         print("Missed deadline: "+str(diff_time)+"ms")
         
     next_time = next_time + sample_time
+
+GYRO_OFFSET = GYRO_OFFSET/max_loops
+print(GYRO_OFFSET)
 
 CALIBRATION_PATH = "data/calibration_data.txt"
 calib = open(CALIBRATION_PATH,'w') 

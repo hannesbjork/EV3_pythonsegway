@@ -35,11 +35,14 @@ gyroSensorValueRaw  = open(str(gyroSensor._path) + "/value0", "rb")
 #Init button
 touchSensor = ev3.Sensor(address="in2")
 
+############################################################### Data dump
+
 #Set up dump data
 dump_location = "data/dump_" + datetime.now().strftime("%Y%m%d%H%M%S") + ".txt"
 dump_num = 0
 dump_max = 500
 data_dump = open(dump_location, 'a')
+dump_end = True
 
 ############################################################### Constants
 
@@ -129,9 +132,6 @@ bodyAng = 0
 
 #Set first time
 next_time = get_time() + sample_time
-
-Sound.beep()
-
 ############################################################### Control loop
 while True:
 
@@ -146,9 +146,6 @@ while True:
     bodyAng = bodyAng + bodyAngSpeed*sample_time_s + bodyAngAcc*(sample_time_s_2)
     wheelAngSpeed = (wheelAng-wheelAng_old)/sample_time_s 
 
-    #Debug TODO
-    print("wheelAng:"+ str(math.trunc(wheelAng))+" bodyAng:"+ str(math.trunc(bodyAng))+" wheelAngSpeed:"+ str(math.trunc(wheelAngSpeed))+" bodyAngSpeed:"+ str(math.trunc(bodyAngSpeed)))
-
     #Control algorithm
     u = ( param_wheelang * wheelAng 
         + param_bodyang * bodyAng 
@@ -162,6 +159,9 @@ while True:
     if dump_num < dump_max:
         dump_num = dump_num + 1
         data_dump.write(str(wheelAng) + " " + str(wheelAngSpeed) + " " + str(bodyAng) + " " + str(bodyAngSpeed) + "\n") 
+    elif dump_end:
+        Sound.beep()
+        dump_end = False
 
     #Loop timing
     diff_time = next_time - get_time()
