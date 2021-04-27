@@ -10,31 +10,6 @@ import sys
 import importlib
 from datetime import datetime
 from time import sleep
-import socket
-
-############################################################# Network connection
-
-HOST = '10.42.0.1'  # The server's hostname or IP address
-PORT = 65432        # The port used by the server
-
-class MySocket:
-    def __init__(self, sock=None):
-        if sock is None:
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        else:
-            self.sock = sock
-
-    def connect(self, host, port):
-        self.sock.connect((host, port))
-
-    def sendmsg(self, msg):
-        self.sock.send(msg)
-
-    def closeconn(self):
-        self.sock.close()
-
-s = MySocket()
-s.connect(HOST, PORT)
 
 ############################################################### Inits
 
@@ -59,6 +34,15 @@ gyroSensorValueRaw  = open(str(gyroSensor._path) + "/value0", "rb")
 
 #Init button
 touchSensor = ev3.Sensor(address="in2")
+
+############################################################### Data dump
+
+#Set up dump data
+dump_location = "data/dump_" + datetime.now().strftime("%Y%m%d%H%M%S") + ".txt"
+dump_num = 0
+dump_max = 500
+data_dump = open(dump_location, 'a')
+dump_end = True
 
 ############################################################### Constants
 
@@ -167,14 +151,17 @@ while True:
         + param_bodyang * bodyAng 
         + param_wheelangspeed * wheelAngSpeed 
         + param_bodyangspeed * bodyAngSpeed )
-    #u=0
 
     set_duty(motorDutyCycleRight, u)
     set_duty(motorDutyCycleLeft , u)
 
-    #Send to network
-    msg = str(wheelAng) + " " + str(wheelAngSpeed) + " " + str(bodyAng) + " " + str(bodyAngSpeed)
-    s.sendmsg(msg.encode('utf-8'))
+    #Data dump
+    if dump_num < dump_max:
+        dump_num = dump_num + 1
+        data_dump.write(str(wheelAng) + " " + str(wheelAngSpeed) + " " + str(bodyAng) + " " + str(bodyAngSpeed) + "\n") 
+    elif dump_end:
+        Sound.beep()
+        dump_end = False
 
     #Loop timing
     diff_time = next_time - get_time()
