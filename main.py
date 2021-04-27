@@ -173,7 +173,7 @@ while True:
     set_duty(motorDutyCycleLeft , u)
 
     #Send to network
-    msg = str(wheelAng) + " " + str(wheelAngSpeed) + " " + str(bodyAng) + " " + str(bodyAngSpeed)
+    msg = str(wheelAng) + " " + str(wheelAngSpeed) + " " + str(bodyAng) + " " + str(bodyAngSpeed) + " "
     s.sendmsg(msg.encode('utf-8'))
 
     #Loop timing
