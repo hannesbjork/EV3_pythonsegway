@@ -6,7 +6,6 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
-
 class LiveGraph4:
 
     def __init__(self, size):
@@ -62,7 +61,6 @@ class LiveGraph4:
 
         if ( vmin <= line.axes.get_ylim()[0] ) or ( vmax >= line.axes.get_ylim()[1] ):
             axs.set_ylim( [vmin - vstd, vmax + vstd] )
-
 
 class SimpleServer:
     def __init__(self, sock=None):

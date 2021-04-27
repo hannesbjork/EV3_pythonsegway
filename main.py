@@ -33,8 +33,14 @@ class MySocket:
     def closeconn(self):
         self.sock.close()
 
-s = MySocket()
-s.connect(HOST, PORT)
+rtdata = True
+
+try:
+    s = MySocket()
+    s.connect(HOST, PORT)
+except:
+    rtdata = False
+    print("No internet connection found.")
 
 ############################################################### Inits
 
@@ -173,8 +179,9 @@ while True:
     set_duty(motorDutyCycleLeft , u)
 
     #Send to network
-    msg = str(wheelAng) + " " + str(wheelAngSpeed) + " " + str(bodyAng) + " " + str(bodyAngSpeed) + " "
-    s.sendmsg(msg.encode('utf-8'))
+    if rtdata:
+        msg = str(wheelAng) + " " + str(wheelAngSpeed) + " " + str(bodyAng) + " " + str(bodyAngSpeed) + " "
+        s.sendmsg(msg.encode('utf-8'))
 
     #Loop timing
     diff_time = next_time - get_time()
